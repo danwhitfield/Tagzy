@@ -22,6 +22,8 @@
     var settings = $.extend($(this).data('tagzy').settings, options);
 		
     return this.each(function (index, Element) {
+    	var keyupEvent = false;
+    	
     	//if plugin is init, set the identifier
     	if(typeof data != "undefined")
 				data++;
@@ -71,6 +73,8 @@
 				,	lastTag
 				,   substrVal;
 				
+				keyupEvent = true;
+				
 				//check for comma delimeter on keypresses
 				if((this.value.substr(-1) === ',' || event.keyCode === 13) && (this.value.length !== 1)) {
 					//create a close button
@@ -85,6 +89,28 @@
 					//update the hidden field
 					updateTagField($(this).parent('.' + settings.containerClass).attr('data-for'));
 				}
+				
+				keyupEvent = false;
+			});
+			
+			// On blur check if there is any entered text not yet converted to a tag.
+			$('.' + settings.inputClass).live('blur', function() {
+                		if(!keyupEvent && $(this).val() !== '') {
+                    			var newTag
+    					,   close
+	    				,   lastTag;
+    				
+    					//create a close button
+					close = $('<a/>', { href: '#', title: 'delete'}).append('x');
+                    			// create the new tag
+					newTag = $('<span/>').addClass(settings.tagClass).append(this.value);
+					//put the tag together with the close button appended
+					$(this).parent('.' + settings.containerClass).append(newTag.append(close));
+					//wipe the text field and refocus
+					$(this).appendTo($(this).parent('.' + settings.containerClass)).val('').focus();
+					//update the hidden field
+					updateTagField($(this).parent('.' + settings.containerClass).attr('data-for'));
+                		}
 			});
 
 			//close a created tag
